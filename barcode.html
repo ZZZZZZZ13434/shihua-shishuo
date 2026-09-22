@@ -63,8 +63,10 @@
   </div>
 </section>
 
-<main>
+<main class="verify-layout">
 
+
+  <div class="verify-main">
   <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
 
   <div class="panel">
@@ -118,8 +120,24 @@
       <span class="report-title">判定报告</span>
       <span class="report-badge" id="reportBadge">—</span>
     </div>
-    <div id="report" aria-live="polite" aria-busy="false"></div>
+    
   </div>
+
+  </div>
+
+  <aside class="verify-side">
+    <div class="report-panel">
+      <div class="report-head">
+        <span class="report-title">判定报告</span>
+        <span class="report-badge" id="reportBadge">待核验</span>
+      </div>
+      <div class="report-scroll">
+        
+        <div id="placeholder" class="report-empty">尚未查询。输入条码后点「查询并核验」。</div>
+        <div id="report" aria-live="polite" aria-busy="false"></div>
+      </div>
+    </div>
+  </aside>
 
 </main>
 

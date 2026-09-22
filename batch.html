@@ -62,8 +62,10 @@
   </div>
 </section>
 
-<main>
+<main class="verify-layout">
 
+
+  <div class="verify-main">
   <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
 
   <div class="panel">
@@ -90,7 +92,7 @@
 
   <div class="panel">
     <div class="panel-title">第二步 · 汇总</div>
-    <div class="stages" id="stages" hidden aria-live="polite"></div>
+    
     <div id="batchSummary" class="muted">尚未核验。</div>
     <div class="note" style="margin-top:12px">
       批量核验为了跑得快，<b>跳过了拍照核验里的「人工核对」环节</b>，用的是原始识别结果。
@@ -104,8 +106,24 @@
       <span class="report-title" id="detailTitle">单张报告</span>
       <span class="report-badge" id="reportBadge">—</span>
     </div>
-    <div id="report" aria-live="polite" aria-busy="false"></div>
+    
   </div>
+
+  </div>
+
+  <aside class="verify-side">
+    <div class="report-panel">
+      <div class="report-head">
+        <span class="report-title">判定报告</span>
+        <span class="report-badge" id="reportBadge">待核验</span>
+      </div>
+      <div class="report-scroll">
+        <div class="stages" id="stages" hidden aria-live="polite"></div>
+        <div id="placeholder" class="report-empty">尚未核验。选择图片后点「开始批量核验」。</div>
+        <div id="report" aria-live="polite" aria-busy="false"></div>
+      </div>
+    </div>
+  </aside>
 
 </main>
 
