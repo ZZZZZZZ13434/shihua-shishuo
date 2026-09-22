@@ -1,0 +1,198 @@
+{
+  "version": "2026.2",
+  "note": "营养阈值规则库。claims 为含量声称的量化条件（用于宣称核验），risk 为健康风险分级阈值（用于风险评分）。所有数值均以现行有效版本的标准原文为准，代码不写死，统一从本文件读取。",
+  "unit_note": "solid 表示固态食品阈值（每 100g），liquid 表示液态食品阈值（每 100mL）。判定时按标签的计量基准自动选择。",
+  "claims": {
+    "NO_SUGAR": {
+      "nutrient": "糖",
+      "op": "<=",
+      "solid": 0.5,
+      "liquid": 0.5,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "GB28050-C-NO-SUGAR",
+      "source": "GB 28050 附录C'无糖'声称条件（示例值，以标准原文为准）"
+    },
+    "LOW_SUGAR": {
+      "nutrient": "糖",
+      "op": "<=",
+      "solid": 5,
+      "liquid": 5,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "GB28050-C-LOW-SUGAR",
+      "source": "GB 28050 附录C'低糖'声称条件（示例值，以标准原文为准）"
+    },
+    "NO_FAT": {
+      "nutrient": "脂肪",
+      "op": "<=",
+      "solid": 0.5,
+      "liquid": 0.5,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "GB28050-C-NO-FAT",
+      "source": "GB 28050 附录C'脱脂/无脂'声称条件（示例值，以标准原文为准）"
+    },
+    "LOW_FAT": {
+      "nutrient": "脂肪",
+      "op": "<=",
+      "solid": 3,
+      "liquid": 1.5,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "GB28050-C-NO-FAT",
+      "source": "GB 28050 附录C'低脂'声称条件（示例值，以标准原文为准）"
+    },
+    "LOW_SODIUM": {
+      "nutrient": "钠",
+      "op": "<=",
+      "solid": 120,
+      "liquid": 120,
+      "unit": "mg",
+      "denominator": 100,
+      "clause": "GB28050-C-LOW-SODIUM",
+      "source": "GB 28050 附录C'低钠'声称条件（示例值，以标准原文为准）"
+    },
+    "NO_ENERGY": {
+      "nutrient": "能量",
+      "op": "<=",
+      "solid": 17,
+      "liquid": 17,
+      "unit": "kJ",
+      "denominator": 100,
+      "clause": "GB28050-C-NO-ENERGY",
+      "source": "GB 28050 附录C'无能量'声称条件（示例值，以标准原文为准）"
+    },
+    "HIGH_CALCIUM": {
+      "nutrient": "钙",
+      "op": ">=",
+      "solid": 240,
+      "liquid": 120,
+      "unit": "mg",
+      "denominator": 100,
+      "clause": "GB28050-C-HIGH-CALCIUM",
+      "source": "GB 28050 附录C'高钙'声称条件（示例值，以标准原文为准）"
+    },
+    "HIGH_FIBER": {
+      "nutrient": "膳食纤维",
+      "op": ">=",
+      "solid": 6,
+      "liquid": 3,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "GB28050-C-HIGH-FIBER",
+      "source": "GB 28050 附录C'高膳食纤维'声称条件（示例值，以标准原文为准）"
+    },
+    "HIGH_PROTEIN": {
+      "nutrient": "蛋白质",
+      "op": ">=",
+      "solid": 12,
+      "liquid": 6,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "GB28050-C-HIGH-CALCIUM",
+      "source": "GB 28050 附录C'高蛋白'声称条件（示例值，以标准原文为准）"
+    },
+    "LIGHT_FAT": {
+      "nutrient": "脂肪",
+      "op": "<=",
+      "solid": 3,
+      "liquid": 1.5,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "MARKET-SELF-CLAIM",
+      "source": "语义类宣称阈值：参照'低脂'声称条件，用于核验'轻负担'类表述（示例值，以标准原文为准）"
+    },
+    "LIGHT_SUGAR": {
+      "nutrient": "糖",
+      "op": "<=",
+      "solid": 5,
+      "liquid": 5,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "MARKET-SELF-CLAIM",
+      "source": "语义类宣称阈值：参照'低糖'声称条件，用于核验'轻负担''更健康'类表述（示例值，以标准原文为准）"
+    },
+    "LIGHT_SODIUM": {
+      "nutrient": "钠",
+      "op": "<=",
+      "solid": 300,
+      "liquid": 300,
+      "unit": "mg",
+      "denominator": 100,
+      "clause": "MARKET-SELF-CLAIM",
+      "source": "语义类宣称阈值：介于'低钠'与'高钠'之间的中档上限，用于核验'更健康'类表述（示例值）"
+    },
+    "LIGHT_ENERGY": {
+      "nutrient": "能量",
+      "op": "<=",
+      "solid": 170,
+      "liquid": 80,
+      "unit": "kJ",
+      "denominator": 100,
+      "clause": "MARKET-SELF-CLAIM",
+      "source": "语义类宣称阈值：参照'低能量'声称条件，用于核验'轻负担'类表述（示例值）"
+    },
+    "CHILD_SODIUM": {
+      "nutrient": "钠",
+      "op": "<=",
+      "solid": 400,
+      "liquid": 200,
+      "unit": "mg",
+      "denominator": 100,
+      "clause": "MARKET-SELF-CLAIM",
+      "source": "语义类宣称阈值：面向儿童的钠含量参考上限（示例值，依据儿童膳食钠摄入建议折算）"
+    },
+    "CHILD_SUGAR": {
+      "nutrient": "糖",
+      "op": "<=",
+      "solid": 15,
+      "liquid": 10,
+      "unit": "g",
+      "denominator": 100,
+      "clause": "MARKET-SELF-CLAIM",
+      "source": "语义类宣称阈值：面向儿童的糖含量参考上限（示例值）"
+    }
+  },
+  "risk": {
+    "note": "健康风险分级阈值，统一按每 100g 基准。参考国际通行的前端包装标签分级做法（高/中/低三档）。",
+    "nutrients": {
+      "钠": {
+        "unit": "mg",
+        "medium": 300,
+        "high": 600,
+        "weight": 1.0,
+        "advice": "钠摄入过多与高血压风险相关，建议优先选择钠含量较低的产品"
+      },
+      "糖": {
+        "unit": "g",
+        "medium": 5,
+        "high": 22.5,
+        "weight": 1.0,
+        "advice": "游离糖摄入过多与龋齿、超重风险相关，建议控制摄入量"
+      },
+      "脂肪": {
+        "unit": "g",
+        "medium": 3,
+        "high": 17.5,
+        "weight": 0.8,
+        "advice": "脂肪含量较高，减重人群建议关注"
+      },
+      "饱和脂肪": {
+        "unit": "g",
+        "medium": 1.5,
+        "high": 5,
+        "weight": 0.6,
+        "advice": "饱和脂肪摄入过多与心血管风险相关"
+      }
+    }
+  },
+  "level_scoring": {
+    "note": "等级到分值的映射，用于总分计算与等级判定。",
+    "低": 0.0,
+    "中": 0.6,
+    "高": 1.0,
+    "score_medium": 0.45,
+    "score_high": 0.75
+  }
+}

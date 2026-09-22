@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拍照核验 · 食话实说 · 静态版</title>
+<link rel="stylesheet" href="static/style.css">
+<style>
+  /* 与首页一致：hero 背景图改纯色底（style.css 里是 /static/hero.jpg 绝对路径），
+     外加顶部「静态展示版」横条样式。 */
+  .hero, .page-hero { background-image: none; background-color: var(--bg-soft); }
+  .hero::before, .page-hero::before { background: rgba(15, 23, 42, .30); }
+  .static-banner {
+    background: rgba(227, 192, 125, .12);
+    border-bottom: 1px solid rgba(227, 192, 125, .35);
+    color: var(--warn);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .static-banner-inner { max-width: var(--wrap); margin: 0 auto; padding: 8px 24px; }
+  .static-banner a { color: var(--warn); }
+  .static-banner b { font-weight: 700; }
+  /* 核对编辑表单：识别结果在这里被逐项改正，改完才判定 */
+  #reviewPanel[hidden] { display: none; }
+  .nutrition-editor { display: grid; gap: 8px; }
+  .nutrient-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 92px 84px 36px;
+    gap: 8px;
+    align-items: center;
+  }
+  .nutrient-row input { width: 100%; }
+  .nutrient-row .n-del {
+    font: inherit;
+    font-size: 16px;
+    line-height: 1;
+    height: 36px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 4px;
+  }
+  .nutrient-row .n-del:hover { color: var(--bad); border-color: var(--bad); }
+  @media (max-width: 640px) {
+    .nutrient-row { grid-template-columns: minmax(0, 1fr) 72px 64px 32px; gap: 6px; }
+  }
+</style>
+</head>
+<body class="p-verify">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">食话实说</span>
+      <span class="brand-tag">静态版</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="verify.html">拍照核验</a>
+      <a href="manual.html">手动录入</a>
+      <a href="batch.html">批量核验</a>
+      <a href="barcode.html">条码查询</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="btn btn-sm" href="index.html">回到首页</a>
+    </div>
+  </div>
+</header>
+
+<div class="static-banner">
+  <div class="static-banner-inner">
+    <b>这是静态展示版</b>：识别在你的浏览器里完成（本地 OCR，照片不上传、不需要 API Key），
+    判定引擎是完整版的 JS 移植。批量核验、条码查询、手动补录与 PDF 报告等完整功能，
+    请下载程序包在本机运行（<a href="about.html">说明与局限</a>）。
+  </div>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <h1>拍照核验</h1>
+    <p>流程：上传照片 → 浏览器内本地 OCR（文字检测 → 版面分区）→ <b>你对照包装核对改正</b> → 开始判定。
+      不需要 API Key；还没有照片时，可以先点示例库体验判定引擎。</p>
+  </div>
+</section>
+
+<main class="verify-layout">
+
+  <div class="verify-main">
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <div class="panel">
+      <div class="panel-title">识别设置（视觉大模型）</div>
+      <p class="small muted" style="margin-top:0">
+        识别在你的浏览器里完成（ONNX Runtime Web 加载 RapidOCR 的 ONNX 模型做文字检测与识别），
+        <b>照片不会上传到任何服务器</b>，也不需要申请 API Key。首次使用需要下载模型文件，之后会走浏览器缓存。
+      </p>
+      <div class="small" id="engineState" style="color:var(--text-soft)"></div>
+      <div class="small muted" id="kbInfo" style="margin-top:8px"></div>
+      <div class="small muted" id="engineInfo" style="margin-top:4px"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">第一步 · 标签照片</div>
+      <label class="dropzone" id="dropzone" for="fileInput">
+        <b>点击选择照片，或把图片拖到这里</b>
+        <span>支持 JPG / PNG / WebP，单张不超过 12MB；识别前会自动调整到合适尺寸</span>
+        <input type="file" id="fileInput" accept="image/*">
+      </label>
+      <div class="preview-wrap" id="previewWrap" hidden>
+        <img id="preview" class="preview" alt="包装照片预览">
+      </div>
+      <div class="file-info" id="fileInfo"></div>
+
+      <div class="btn-row">
+        <button class="btn" type="button" id="btnVerify">开始识别</button>
+        <button class="btn-ghost" type="button" id="btnClear">清空</button>
+      </div>
+      <div class="field-hint">识别完成后会出现「第二步 · 核对识别结果」，那里才真正出判定结论。</div>
+    </div>
+
+    <div class="panel" id="reviewPanel" hidden>
+      <div class="panel-title">第二步 · 核对识别结果（判定前请先核对）</div>
+      <p class="small muted" style="margin-top:0">
+        <b style="color:var(--warn)">识别结果仅供参考，请核对后再判定</b>——OCR 同样会读错：
+        倾斜、反光、小字粘连都会让某几行读漏或读错，而判定引擎再准也救不回一份错的输入。
+        下面把识别到的配料表、营养成分表与宣称语都摊开成可编辑的字段，
+        请对照包装改正后再点「开始判定」。
+      </p>
+      <div id="reviewWarnings"></div>
+
+      <label for="editProductName">产品名称</label>
+      <input type="text" id="editProductName" placeholder="可不填">
+
+      <label for="editIngredients">配料表原文（按包装顺序）</label>
+      <textarea id="editIngredients" rows="4" placeholder="水、白砂糖、浓缩柠檬汁、柠檬酸、山梨酸钾、食用香精"></textarea>
+      <div class="field-hint">用、分隔。复合配料的括号照抄，例如「风味发酵乳（水、脱脂乳粉、白砂糖）」，括号内的配料会计入判定但不计入配料项数。</div>
+
+      <label>营养成分表</label>
+      <div class="nutrition-editor" id="nutritionEditor"></div>
+      <div class="btn-row" style="margin:10px 0 0">
+        <button class="btn-ghost" type="button" id="btnAddNutrient">添加一行</button>
+      </div>
+      <div class="field-hint">数值留空表示这一项不参与判定（与「看不清」同样处理），不要用 0 代替看不清的数值。</div>
+
+      <label for="editBasis">计量基准</label>
+      <input type="text" id="editBasis" placeholder="每100mL 或 每100g 或 每份">
+      <div class="field-hint">是每 100g 还是每 100mL 会直接影响声称判定，请照包装填写。</div>
+
+      <label for="editClaims">宣称语</label>
+      <textarea id="editClaims" rows="2" placeholder="0蔗糖、0脂肪"></textarea>
+      <div class="field-hint">只填包装上明确印出的宣称，用、分隔；没有就留空。</div>
+
+      <div class="btn-row">
+        <button class="btn" type="button" id="btnJudge">开始判定</button>
+        <button class="btn-ghost" type="button" id="btnResetReview">撤销修改，恢复识别结果</button>
+      </div>
+    </div>
+
+    <div class="panel" id="profilePanel">
+      <div class="panel-title">我的健康档案</div>
+      <p class="small muted" style="margin-top:0">
+        设定之后，核验时若配料表里出现相关来源，报告最上方会给出提醒。
+        档案只保存在本机浏览器，不会上传，也不与任何账号关联；留空则完全不显示过敏原区块。
+      </p>
+
+      <label id="allergenLabel">过敏原（可多选，共 14 类）</label>
+      <div class="allergen-picker" id="allergenPicker" role="group" aria-labelledby="allergenLabel"></div>
+      <div class="field-hint">
+        依据 GB 7718-2011 附录 C 的八类，以及欧盟 1169/2011 附录 II 的其余六类。
+      </div>
+
+      <label for="population">关注人群</label>
+      <select id="population"></select>
+      <div class="field-hint">同一份标签，不同人群的风险等级不同。</div>
+
+      <label for="avoidInput">额外关注的字样（可选）</label>
+      <input type="text" id="avoidInput" placeholder="如：糖、植脂末、代可可脂">
+      <div class="field-hint">用顿号或逗号分隔。命中时只做字面提示，不参与判定。</div>
+
+      <div class="profile-summary" id="profileSummary"></div>
+
+      <div class="btn-row">
+        <button class="btn-ghost" type="button" id="btnProfileClear">清空档案</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">示例库（不需要 API Key）</div>
+      <p class="small muted" style="margin-top:0">
+        四个案例的数据都经实测核对，点任意一张即用它的数据跑一次判定，
+        可以看到同一份标签在「只看营养成分表」与本引擎下的结论差异。
+      </p>
+      <div class="sample-grid" id="sampleGrid"></div>
+      <div class="panel" id="sampleDetail" style="margin:16px 0 0" hidden></div>
+    </div>
+
+  </div>
+
+  <aside class="verify-side">
+    <div class="report-panel">
+      <div class="report-head">
+        <span class="report-title">判定报告</span>
+        <span class="report-badge" id="reportBadge">待核验</span>
+      </div>
+      <div class="report-scroll">
+        <div class="stages" id="stages" hidden aria-live="polite"></div>
+        <div id="placeholder" class="report-empty">
+          尚未核验。<br>上传包装照片，或点左侧示例库的任意一张开始。
+        </div>
+        <div id="report" aria-live="polite" aria-busy="false"></div>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 32 32" width="17" height="17" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      食话实说 · 食品标签「宣称—配料」一致性核验与健康风险判定引擎
+    </p>
+    <p>本工具基于国家标准阈值的参考性判定，不构成医疗或营养建议。阈值以现行有效版本标准原文为准（GB 7718 / GB 28050 / GB 2760）。</p>
+    <p>识别不清时不给出猜测性结论，会说明缺少哪一项。静态版由视觉大模型识别，照片会发送至模型服务方。</p>
+  </div>
+</footer>
+
+<script src="static/rules.js"></script>
+<script src="static/ocr.js"></script>
+<script src="static/app.js"></script>
+<script src="static/profile.js"></script>
+<script src="static/ocr-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>手动录入 · 食话实说 · 静态版</title>
+<link rel="stylesheet" href="static/style.css">
+<style>
+  /* 与其它页一致：hero 背景图改纯色底 + 静态版横条样式。 */
+  .hero, .page-hero { background-image: none; background-color: var(--bg-soft); }
+  .hero::before, .page-hero::before { background: rgba(15, 23, 42, .30); }
+  .static-banner {
+    background: rgba(227, 192, 125, .12);
+    border-bottom: 1px solid rgba(227, 192, 125, .35);
+    color: var(--warn);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .static-banner-inner { max-width: var(--wrap); margin: 0 auto; padding: 8px 24px; }
+  .static-banner a { color: var(--warn); }
+  .static-banner b { font-weight: 700; }
+</style>
+</head>
+<body class="p-manual">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">食话实说</span>
+      <span class="brand-tag">静态版</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="verify.html">拍照核验</a>
+      <a href="manual.html">手动录入</a>
+      <a href="batch.html">批量核验</a>
+      <a href="barcode.html">条码查询</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="btn btn-sm" href="verify.html">开始核验</a>
+    </div>
+  </div>
+</header>
+
+<div class="static-banner">
+  <div class="static-banner-inner">
+    <b>这是静态展示版</b>：判定在你的浏览器里完成，没有任何服务器参与。
+    批量核验与 PDF 报告等完整功能，请下载程序包在本机运行（<a href="about.html">说明与局限</a>）。
+  </div>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <h1>手动录入</h1>
+    <p>手边没有照片、或者照片拍不清时，直接把包装上的文字敲进来。判定逻辑与拍照核验完全相同。</p>
+  </div>
+</section>
+
+<main class="verify-layout">
+
+  <div class="verify-main">
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <div class="panel">
+      <div class="panel-title">标签文本</div>
+      <p class="small muted" style="margin-top:0">
+        只需要填你手上有的部分：只有配料表也能核验配料相关声称（无添加、0 蔗糖），
+        只有营养成分表也能核验含量声称。缺的部分会被如实标成"无法核验"，不会猜。
+      </p>
+
+      <label for="productName">产品名称（可不填）</label>
+      <input type="text" id="productName" placeholder="例如：某某牌柠檬茶">
+
+      <label for="ingredientsText">配料表</label>
+      <textarea id="ingredientsText" rows="4" placeholder="水、果葡糖浆、白砂糖、浓缩柠檬汁、柠檬酸、食用香精"></textarea>
+      <div class="field-hint">按包装上的顺序，用、分隔。复合配料的括号照抄，例如「风味发酵乳（水、脱脂乳粉、白砂糖）」。</div>
+
+      <label for="nutritionText">营养成分表</label>
+      <textarea id="nutritionText" rows="3" placeholder="能量 180kJ、蛋白质 0g、脂肪 0g、碳水化合物 10.6g、糖 0g、钠 20mg"></textarea>
+      <div class="field-hint">写成「项目 数值单位」，用、分隔；NRV% 可以照抄在后面。表头的基准也可以直接写进来，如「每100mL 能量 180kJ」。</div>
+
+      <label for="basis">计量基准（可不填）</label>
+      <input type="text" id="basis" placeholder="每100mL 或 每100g 或 每份">
+      <div class="field-hint">留空时按每 100g 处理；是每 100mL 的话建议填上，会直接影响声称判定的阈值。</div>
+
+      <label for="claimsText">宣称语</label>
+      <textarea id="claimsText" rows="2" placeholder="0蔗糖、0脂肪"></textarea>
+      <div class="field-hint">只填包装上明确印出的宣称，用、分隔；没有就留空。</div>
+
+      <div class="btn-row">
+        <button class="btn" type="button" id="btnVerify">开始判定</button>
+        <button class="btn-ghost" type="button" id="btnClear">清空</button>
+      </div>
+      <div class="small muted" id="kbInfo"></div>
+      <div class="small muted" id="engineInfo" style="margin-top:4px"></div>
+    </div>
+
+    <div class="panel" id="profilePanel">
+      <div class="panel-title">我的健康档案</div>
+      <p class="small muted" style="margin-top:0">
+        设定之后，核验时若配料表里出现相关来源，报告最上方会给出提醒。
+        档案只保存在本机浏览器，不会上传，也不与任何账号关联；留空则完全不显示过敏原区块。
+      </p>
+
+      <label id="allergenLabel">过敏原（可多选，共 14 类）</label>
+      <div class="allergen-picker" id="allergenPicker" role="group" aria-labelledby="allergenLabel"></div>
+      <div class="field-hint">
+        依据 GB 7718-2011 附录 C 的八类，以及欧盟 1169/2011 附录 II 的其余六类。
+      </div>
+
+      <label for="population">关注人群</label>
+      <select id="population"></select>
+      <div class="field-hint">同一份标签，不同人群的风险等级不同。</div>
+
+      <label for="avoidInput">额外关注的字样（可选）</label>
+      <input type="text" id="avoidInput" placeholder="如：糖、植脂末、代可可脂">
+      <div class="field-hint">用顿号或逗号分隔。命中时只做字面提示，不参与判定。</div>
+
+      <div class="profile-summary" id="profileSummary"></div>
+
+      <div class="btn-row">
+        <button class="btn-ghost" type="button" id="btnProfileClear">清空档案</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">示例库</div>
+      <p class="small muted" style="margin-top:0">
+        不知道填什么格式？点一张卡片，它会自动把数据填进上面的表单并直接判定，
+        你可以顺势看看格式长什么样。
+      </p>
+      <div class="sample-grid" id="sampleGrid"></div>
+      <div class="panel" id="sampleDetail" style="margin:16px 0 0" hidden></div>
+    </div>
+
+  </div>
+
+  <aside class="verify-side">
+    <div class="report-panel">
+      <div class="report-head">
+        <span class="report-title">判定报告</span>
+        <span class="report-badge" id="reportBadge">待核验</span>
+      </div>
+      <div class="report-scroll">
+        <div class="stages" id="stages" hidden aria-live="polite"></div>
+        <div id="placeholder" class="report-empty">
+          尚未判定。<br>填写左侧表单后点「开始判定」，或点左侧示例库的任意一张。
+        </div>
+        <div id="report" aria-live="polite" aria-busy="false"></div>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 32 32" width="17" height="17" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      食话实说 · 食品标签「宣称—配料」一致性核验与健康风险判定引擎
+    </p>
+    <p>本工具基于国家标准阈值的参考性判定，不构成医疗或营养建议。阈值以现行有效版本标准原文为准（GB 7718 / GB 28050 / GB 2760）。</p>
+  </div>
+</footer>
+
+<script src="static/rules.js"></script>
+<script src="static/ocr.js"></script>
+<script src="static/app.js"></script>
+<script src="static/profile.js"></script>
+<script src="static/page-manual.js"></script>
+</body>
+</html>

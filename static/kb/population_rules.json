@@ -1,0 +1,204 @@
+{
+  "version": "2026.2",
+  "note": "人群适配库。weights 用于调整风险评分的营养素权重；rules 为触发式规则，命中后直接把该人群的风险等级提升到指定档位，并输出原因文本。最终等级取『加权评分等级』与『规则触发等级』的较高者。nutrition_min_warn 规则的 value 必须配合 unit 声明，引擎会先把标签数值换算到每 100g/100mL 并统一单位后再比较——修复前缺少 unit 导致『钠 0.35g/100g』无法触发 300mg 阈值。",
+  "rule_types": {
+    "ingredient_group_warn": "配料命中指定分组时触发",
+    "nutrition_min_warn": "某营养素含量达到或超过阈值时触发（须声明 unit）",
+    "additive_warn": "配料中含食品添加剂（可限定功能类别）时触发"
+  },
+  "populations": {
+    "成人": {
+      "desc": "普通成年人，按通用阈值判定",
+      "weights": {},
+      "rules": []
+    },
+    "糖尿病": {
+      "desc": "糖尿病患者及血糖管理人群",
+      "weights": {
+        "糖": 2.5,
+        "脂肪": 1.2,
+        "饱和脂肪": 1.2
+      },
+      "rules": [
+        {
+          "id": "DM-01",
+          "type": "ingredient_group_warn",
+          "groups": [
+            "SUGAR_GROUP"
+          ],
+          "level": "高",
+          "reason": "配料中含糖类物质（{items}），不利于血糖控制"
+        },
+        {
+          "id": "DM-02",
+          "type": "nutrition_min_warn",
+          "nutrient": "糖",
+          "value": 5,
+          "unit": "g",
+          "level": "中",
+          "reason": "糖含量 {value}{unit}/100g，血糖管理人群需控制摄入"
+        },
+        {
+          "id": "DM-03",
+          "type": "ingredient_group_warn",
+          "groups": [
+            "SUGAR_SOURCE_GROUP"
+          ],
+          "level": "中",
+          "reason": "配料中含高升糖潜力成分（{items}）"
+        }
+      ]
+    },
+    "高血压": {
+      "desc": "高血压患者及需控盐人群",
+      "weights": {
+        "钠": 2.5
+      },
+      "rules": [
+        {
+          "id": "HT-01",
+          "type": "nutrition_min_warn",
+          "nutrient": "钠",
+          "value": 600,
+          "unit": "mg",
+          "level": "高",
+          "reason": "钠含量 {value}{unit}/100g，属于高钠，高血压人群应谨慎选择"
+        },
+        {
+          "id": "HT-02",
+          "type": "nutrition_min_warn",
+          "nutrient": "钠",
+          "value": 300,
+          "unit": "mg",
+          "level": "中",
+          "reason": "钠含量 {value}{unit}/100g 偏高，建议控制食用量"
+        }
+      ]
+    },
+    "肾病": {
+      "desc": "慢性肾病患者，需限制钠、蛋白质与磷的摄入",
+      "weights": {
+        "钠": 2.0,
+        "蛋白质": 1.5
+      },
+      "rules": [
+        {
+          "id": "KD-01",
+          "type": "nutrition_min_warn",
+          "nutrient": "钠",
+          "value": 300,
+          "unit": "mg",
+          "level": "高",
+          "reason": "钠含量 {value}{unit}/100g，肾病患者需严格限制钠摄入"
+        },
+        {
+          "id": "KD-02",
+          "type": "nutrition_min_warn",
+          "nutrient": "蛋白质",
+          "value": 12,
+          "unit": "g",
+          "level": "中",
+          "reason": "蛋白质含量 {value}{unit}/100g 较高，需遵医嘱控制蛋白摄入"
+        },
+        {
+          "id": "KD-03",
+          "type": "additive_warn",
+          "level": "中",
+          "reason": "含食品添加剂（{items}），肾功能不全者建议选择配料更简单的食品"
+        }
+      ]
+    },
+    "儿童": {
+      "desc": "3~12 岁儿童",
+      "weights": {
+        "糖": 2.0,
+        "钠": 1.8
+      },
+      "rules": [
+        {
+          "id": "CH-01",
+          "type": "additive_warn",
+          "functions": [
+            "着色剂",
+            "甜味剂",
+            "防腐剂"
+          ],
+          "level": "中",
+          "reason": "含{items}，儿童建议减少摄入"
+        },
+        {
+          "id": "CH-02",
+          "type": "nutrition_min_warn",
+          "nutrient": "钠",
+          "value": 600,
+          "unit": "mg",
+          "level": "高",
+          "reason": "钠含量 {value}{unit}/100g，属于高钠，不适合儿童经常食用"
+        },
+        {
+          "id": "CH-03",
+          "type": "nutrition_min_warn",
+          "nutrient": "糖",
+          "value": 22.5,
+          "unit": "g",
+          "level": "高",
+          "reason": "糖含量 {value}{unit}/100g，属于高糖，建议控制食用频率"
+        }
+      ]
+    },
+    "孕妇": {
+      "desc": "孕期人群",
+      "weights": {
+        "钠": 1.5,
+        "糖": 1.5
+      },
+      "rules": [
+        {
+          "id": "PG-01",
+          "type": "additive_warn",
+          "functions": [
+            "防腐剂",
+            "着色剂"
+          ],
+          "level": "中",
+          "reason": "含{items}，孕期建议优先选择配料简单的食品"
+        },
+        {
+          "id": "PG-02",
+          "type": "nutrition_min_warn",
+          "nutrient": "钠",
+          "value": 600,
+          "unit": "mg",
+          "level": "高",
+          "reason": "钠含量 {value}{unit}/100g，属于高钠，孕期需注意控制"
+        }
+      ]
+    },
+    "痛风": {
+      "desc": "高尿酸血症及痛风人群",
+      "weights": {
+        "糖": 1.8
+      },
+      "rules": [
+        {
+          "id": "GT-01",
+          "type": "ingredient_group_warn",
+          "groups": [
+            "SUGAR_GROUP"
+          ],
+          "level": "高",
+          "reason": "配料中含糖类物质（{items}），其中果糖可升高血尿酸水平"
+        },
+        {
+          "id": "GT-02",
+          "type": "nutrition_min_warn",
+          "nutrient": "糖",
+          "value": 10,
+          "unit": "g",
+          "level": "中",
+          "reason": "糖含量 {value}{unit}/100g 偏高，痛风人群建议控制"
+        }
+      ]
+    }
+  }
+}

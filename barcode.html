@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>条码查询 · 食话实说 · 静态版</title>
+<link rel="stylesheet" href="static/style.css">
+<style>
+  /* 与其它页一致：hero 背景图改纯色底 + 静态版横条样式。 */
+  .hero, .page-hero { background-image: none; background-color: var(--bg-soft); }
+  .hero::before, .page-hero::before { background: rgba(15, 23, 42, .30); }
+  .static-banner {
+    background: rgba(227, 192, 125, .12);
+    border-bottom: 1px solid rgba(227, 192, 125, .35);
+    color: var(--warn);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .static-banner-inner { max-width: var(--wrap); margin: 0 auto; padding: 8px 24px; }
+  .static-banner a { color: var(--warn); }
+  .static-banner b { font-weight: 700; }
+  .barcode-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .barcode-row .field { flex: 1 1 260px; }
+  .barcode-row input { font-family: Consolas, "Courier New", monospace; letter-spacing: 1px; }
+  .check-ok { color: var(--ok); font-weight: 600; }
+  .check-bad { color: var(--bad); font-weight: 600; }
+</style>
+</head>
+<body class="p-barcode">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">食话实说</span>
+      <span class="brand-tag">静态版</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="verify.html">拍照核验</a>
+      <a href="manual.html">手动录入</a>
+      <a href="batch.html">批量核验</a>
+      <a href="barcode.html">条码查询</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="btn btn-sm" href="verify.html">开始核验</a>
+    </div>
+  </div>
+</header>
+
+<div class="static-banner">
+  <div class="static-banner-inner">
+    <b>这是静态展示版</b>：没有服务端，条码查询能力比完整版弱得多——本页把能做的做扎实、
+    做不到的如实说清楚，不给你一个查不出东西的按钮（<a href="about.html">说明与局限</a>）。
+  </div>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <h1>条码查询</h1>
+    <p>输入包装上的 13 位商品条码：校验位可以本地验证；公开数据库记录能不能取到，取决于对方是否放行跨域与是否收录该商品。</p>
+  </div>
+</section>
+
+<main>
+
+  <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+  <div class="panel">
+    <div class="panel-title">条码</div>
+    <div class="barcode-row">
+      <div class="field">
+        <label for="barcodeInput" style="margin-top:0">13 位商品条码（EAN-13）</label>
+        <input type="text" id="barcodeInput" inputmode="numeric" maxlength="13"
+               placeholder="例如 6901234567892" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="btn-row" style="margin:0">
+        <button class="btn" type="button" id="btnCheck">校验条码</button>
+        <button class="btn-ghost" type="button" id="btnQuery">尝试查询数据库</button>
+      </div>
+    </div>
+    <div class="field-hint">本版没有实现条码扫描（那需要摄像头与解码库），只能手动输入。</div>
+    <div id="checkResult" class="small" style="margin-top:12px"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">这一页为什么和完整版不一样</div>
+    <ul class="plain-list">
+      <li><b>跨域不由我们决定</b>：完整版的条码查询在服务端发起，不受浏览器同源策略限制；
+        静态版只有浏览器，直接请求 Open Food Facts 时会受对方的 CORS 策略约束。
+        对方是否对读取端点放行跨域、是否长期放行，都不在我们控制之内。所以本页不承诺"一定查得到"。</li>
+      <li><b>收录率本来就低</b>：Open Food Facts 对中国预包装食品的收录很少，多数国产商品没有记录。</li>
+      <li><b>数据库记录里没有"宣称"</b>：OFF 记录通常只有配料与营养数据，没有包装正面的宣称语。
+        因此用数据库记录只能做风险分级与人群适配，<b>做不了宣称核验</b>——
+        要核验宣称，请用拍照核验或手动录入，把包装上的宣称一起填进去。</li>
+      <li><b>能保证的是校验位</b>：条码本身的校验位验证完全在本地完成，不依赖网络，结果确定。</li>
+    </ul>
+    <p class="small muted">
+      数据来源：<a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a>（ODbL 许可）。
+      使用其数据时请保留来源署名。
+    </p>
+  </div>
+
+  <div class="panel" id="dbPanel" hidden>
+    <div class="panel-title">数据库记录</div>
+    <div id="dbResult"></div>
+    <div class="btn-row">
+      <button class="btn" type="button" id="btnUseRecord">用这份记录做判定</button>
+    </div>
+    <div class="field-hint">
+      注意：数据库记录的营养值以每 100g 计；且记录里没有包装宣称，判定结果只会包含风险分级、人群适配与添加剂提示。
+    </div>
+  </div>
+
+  <div class="panel" id="reportPanel" hidden>
+    <div class="report-head" style="padding:0 0 12px; border-bottom:1px solid var(--line); margin-bottom:14px">
+      <span class="report-title">判定报告</span>
+      <span class="report-badge" id="reportBadge">—</span>
+    </div>
+    <div id="report" aria-live="polite" aria-busy="false"></div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 32 32" width="17" height="17" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      食话实说 · 食品标签「宣称—配料」一致性核验与健康风险判定引擎
+    </p>
+    <p>本工具基于国家标准阈值的参考性判定，不构成医疗或营养建议。阈值以现行有效版本标准原文为准（GB 7718 / GB 28050 / GB 2760）。</p>
+    <p>真实语料来自 Open Food Facts（ODbL）；源码、知识库与评测脚本随作品一并提交。</p>
+  </div>
+</footer>
+
+<script src="static/rules.js"></script>
+<script src="static/ocr.js"></script>
+<script src="static/app.js"></script>
+<script src="static/profile.js"></script>
+<script src="static/page-barcode.js"></script>
+</body>
+</html>

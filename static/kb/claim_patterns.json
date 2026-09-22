@@ -1,0 +1,720 @@
+{
+  "version": "2026.2",
+  "note": "宣称话术模式库。每条模式描述一类包装宣称及其核验条件。constraints 影响判定结论；advisories 只输出提示、不影响判定。阈值不写死在此文件，通过 threshold_ref 引用 nutrition_thresholds.json。",
+  "pattern_schema": {
+    "id": "模式唯一标识",
+    "name": "模式名称",
+    "match": "命中该模式的文本片段列表（匹配时按片段长度优先）",
+    "regulated": "是否为国家标准中的规范声称",
+    "constraints": "核验约束列表：nutrition_max / nutrition_min / ingredient_absent / ingredient_present / additive_absent",
+    "advisories": "提示列表，命中后追加到报告中",
+    "clauses": "涉及的标准条款 ID",
+    "note": "固定附加说明"
+  },
+  "patterns": [
+    {
+      "id": "CLAIM_NO_SUGAR",
+      "name": "无糖 / 0糖 / 零糖",
+      "match": [
+        "无糖",
+        "0糖",
+        "零糖",
+        "不含糖",
+        "0%糖",
+        "无蔗糖添加"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_max",
+          "nutrient": "糖",
+          "threshold_ref": "NO_SUGAR",
+          "desc": "营养成分表中糖含量需符合'无糖'声称条件",
+          "violation_note": "营养成分表标示糖 {value}{unit}/{basis}，超出'无糖'声称条件",
+          "missing_note": "营养成分表未标示糖含量，无法核验'无糖'声称",
+          "clause": "GB28050-C-NO-SUGAR"
+        },
+        {
+          "type": "ingredient_absent",
+          "groups": [
+            "SUGAR_GROUP"
+          ],
+          "desc": "配料表中不得出现糖类物质",
+          "violation_note": "配料表中检出糖类物质：{hits}",
+          "clause": "GB7718-4.1.4.1"
+        }
+      ],
+      "advisories": [
+        {
+          "type": "ingredient_present",
+          "groups": [
+            "SUGAR_ALCOHOL_GROUP"
+          ],
+          "message": "配料中含糖醇（{items}），不属于糖，但过量摄入可能引起肠胃不适"
+        }
+      ],
+      "clauses": [
+        "GB28050-C-NO-SUGAR",
+        "GB7718-4.1.4.1"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_ZERO_SUCROSE",
+      "name": "0 蔗糖 / 无蔗糖（企业自创表述）",
+      "match": [
+        "0蔗糖",
+        "零蔗糖",
+        "无蔗糖",
+        "不含蔗糖",
+        "0添加蔗糖",
+        "不添加蔗糖",
+        "0%蔗糖"
+      ],
+      "regulated": false,
+      "constraints": [
+        {
+          "type": "nutrition_max",
+          "nutrient": "糖",
+          "threshold_ref": "NO_SUGAR",
+          "desc": "'0 蔗糖'通常被消费者理解为无糖，营养成分表中的糖含量需符合无糖声称条件",
+          "violation_note": "营养成分表标示糖 {value}{unit}/{basis}，与'0 蔗糖'通常传达的'无糖'含义不符",
+          "missing_note": "营养成分表未标示糖含量，无法核验'0 蔗糖'与实际糖含量的关系",
+          "clause": "GB28050-C-NO-SUGAR"
+        },
+        {
+          "type": "ingredient_absent",
+          "groups": [
+            "SUCROSE_GROUP"
+          ],
+          "desc": "配料表中不得出现蔗糖类物质",
+          "violation_note": "配料表中检出蔗糖类物质：{hits}",
+          "clause": "GB7718-4.1.4.1"
+        },
+        {
+          "type": "ingredient_absent",
+          "groups": [
+            "SUGAR_GROUP"
+          ],
+          "desc": "配料表中不得出现其他糖类物质（'0 蔗糖'通常被消费者理解为无糖）",
+          "violation_note": "配料表中检出其他糖类物质：{hits}；虽字面不含蔗糖，但与'0 蔗糖'通常传达的'无糖'含义不符",
+          "clause": "GB7718-4.1.4.2"
+        }
+      ],
+      "advisories": [
+        {
+          "type": "nutrition_present",
+          "nutrient": "糖",
+          "message": "营养成分表标示糖 {value}{unit}/{basis}，请以此作为实际糖摄入的判断依据"
+        }
+      ],
+      "clauses": [
+        "GB7718-4.1.4.1",
+        "GB7718-4.1.4.2",
+        "GB28050-4.4-NUMERIC"
+      ],
+      "note": "该表述非国家标准中的规范含量声称。国标规范声称为'无糖''低糖'，并规定了量化条件；'0 蔗糖'为企业自创表述，判定以配料表是否存在糖类物质为准。"
+    },
+    {
+      "id": "CLAIM_LOW_SUGAR",
+      "name": "低糖",
+      "match": [
+        "低糖",
+        "少糖"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_max",
+          "nutrient": "糖",
+          "threshold_ref": "LOW_SUGAR",
+          "desc": "营养成分表中糖含量需符合'低糖'声称条件",
+          "violation_note": "营养成分表标示糖 {value}{unit}/{basis}，超出'低糖'声称条件",
+          "missing_note": "营养成分表未标示糖含量，无法核验'低糖'声称",
+          "clause": "GB28050-C-LOW-SUGAR"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-LOW-SUGAR"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_NO_ADDITIVE",
+      "name": "无添加 / 0 添加 / 零添加",
+      "match": [
+        "无添加",
+        "0添加",
+        "零添加",
+        "不添加",
+        "无添加剂",
+        "0添加剂"
+      ],
+      "regulated": false,
+      "constraints": [
+        {
+          "type": "additive_absent",
+          "desc": "配料表中不得出现任何食品添加剂",
+          "violation_note": "配料表中检出食品添加剂：{hits}",
+          "clause": "GB7718-4.1.3.1.2"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB7718-4.1.3.1.2",
+        "GB2760-3"
+      ],
+      "note": "'无添加'并非国家标准中的规范声称用语。食品添加剂的使用应符合国家标准要求，本判定以配料表中是否标示食品添加剂为准。"
+    },
+    {
+      "id": "CLAIM_NO_PRESERVATIVE",
+      "name": "不添加防腐剂 / 无防腐剂",
+      "match": [
+        "不添加防腐剂",
+        "无防腐剂",
+        "0防腐剂",
+        "不含防腐剂",
+        "不加防腐剂"
+      ],
+      "regulated": false,
+      "constraints": [
+        {
+          "type": "additive_absent",
+          "function": "防腐剂",
+          "desc": "配料表中不得出现防腐剂类食品添加剂",
+          "violation_note": "配料表中检出防腐剂：{hits}",
+          "clause": "GB7718-4.1.3.1.2"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB7718-4.1.3.1.2",
+        "GB2760-3"
+      ],
+      "note": "本判定以配料表中是否标示防腐剂类食品添加剂为准。"
+    },
+    {
+      "id": "CLAIM_ZERO_FAT",
+      "name": "0 脂肪 / 无脂肪 / 脱脂",
+      "match": [
+        "0脂肪",
+        "零脂肪",
+        "无脂肪",
+        "脱脂",
+        "0脂",
+        "不含脂肪"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_max",
+          "nutrient": "脂肪",
+          "threshold_ref": "NO_FAT",
+          "desc": "营养成分表中脂肪含量需符合'无脂/脱脂'声称条件",
+          "violation_note": "营养成分表标示脂肪 {value}{unit}/{basis}，超出'无脂/脱脂'声称条件",
+          "missing_note": "营养成分表未标示脂肪含量，无法核验该声称",
+          "clause": "GB28050-C-NO-FAT"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-NO-FAT"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_LOW_FAT",
+      "name": "低脂 / 低脂肪",
+      "match": [
+        "低脂",
+        "低脂肪",
+        "少油"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_max",
+          "nutrient": "脂肪",
+          "threshold_ref": "LOW_FAT",
+          "desc": "营养成分表中脂肪含量需符合'低脂'声称条件",
+          "violation_note": "营养成分表标示脂肪 {value}{unit}/{basis}，超出'低脂'声称条件",
+          "missing_note": "营养成分表未标示脂肪含量，无法核验'低脂'声称",
+          "clause": "GB28050-C-NO-FAT"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-NO-FAT"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_LOW_SODIUM",
+      "name": "低钠 / 低盐",
+      "match": [
+        "低钠",
+        "低盐",
+        "少盐",
+        "减盐"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_max",
+          "nutrient": "钠",
+          "threshold_ref": "LOW_SODIUM",
+          "desc": "营养成分表中钠含量需符合'低钠'声称条件",
+          "violation_note": "营养成分表标示钠 {value}{unit}/{basis}，超出'低钠'声称条件",
+          "missing_note": "营养成分表未标示钠含量，无法核验'低钠'声称",
+          "clause": "GB28050-C-LOW-SODIUM"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-LOW-SODIUM"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_ZERO_CALORIE",
+      "name": "0 卡 / 零卡 / 无能量",
+      "match": [
+        "0卡",
+        "零卡",
+        "0卡路里",
+        "零卡路里",
+        "无能量",
+        "0能量",
+        "0热量"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_max",
+          "nutrient": "能量",
+          "threshold_ref": "NO_ENERGY",
+          "desc": "营养成分表中能量需符合'无能量'声称条件",
+          "violation_note": "营养成分表标示能量 {value}{unit}/{basis}，超出'无能量'声称条件",
+          "missing_note": "营养成分表未标示能量，无法核验该声称",
+          "clause": "GB28050-C-NO-ENERGY"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-NO-ENERGY"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_HIGH_CALCIUM",
+      "name": "高钙 / 富含钙",
+      "match": [
+        "高钙",
+        "富含钙",
+        "钙含量高",
+        "加钙",
+        "钙强化"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_min",
+          "nutrient": "钙",
+          "threshold_ref": "HIGH_CALCIUM",
+          "desc": "营养成分表中钙含量需达到'高钙'声称条件",
+          "violation_note": "营养成分表标示钙 {value}{unit}/{basis}，未达到'高钙'声称条件",
+          "missing_note": "营养成分表未标示钙含量，无法核验'高钙'声称",
+          "clause": "GB28050-C-HIGH-CALCIUM"
+        },
+        {
+          "type": "ingredient_present",
+          "groups": [
+            "CALCIUM_GROUP"
+          ],
+          "desc": "配料表中应出现钙来源物质",
+          "violation_note": "配料表中未检出明确的钙来源物质（如乳粉、碳酸钙、乳酸钙等）",
+          "clause": "GB7718-4.1.4.1"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-HIGH-CALCIUM",
+        "GB7718-4.1.4.1"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_HIGH_FIBER",
+      "name": "高膳食纤维 / 富含膳食纤维",
+      "match": [
+        "高膳食纤维",
+        "富含膳食纤维",
+        "高纤维",
+        "含膳食纤维",
+        "添加膳食纤维"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_min",
+          "nutrient": "膳食纤维",
+          "threshold_ref": "HIGH_FIBER",
+          "desc": "营养成分表中膳食纤维含量需达到声称条件",
+          "violation_note": "营养成分表标示膳食纤维 {value}{unit}/{basis}，未达到'高膳食纤维'声称条件",
+          "missing_note": "营养成分表未标示膳食纤维含量，无法核验该声称",
+          "clause": "GB28050-C-HIGH-FIBER"
+        },
+        {
+          "type": "ingredient_present",
+          "groups": [
+            "FIBER_GROUP"
+          ],
+          "desc": "配料表中应出现膳食纤维类物质",
+          "violation_note": "配料表中未检出明确的膳食纤维类物质（如全麦粉、燕麦、菊粉、抗性糊精等）",
+          "clause": "GB7718-4.1.4.1"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-HIGH-FIBER",
+        "GB7718-4.1.4.1"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_HIGH_PROTEIN",
+      "name": "高蛋白 / 富含蛋白质",
+      "match": [
+        "高蛋白",
+        "富含蛋白质",
+        "蛋白质含量高",
+        "蛋白强化"
+      ],
+      "regulated": true,
+      "constraints": [
+        {
+          "type": "nutrition_min",
+          "nutrient": "蛋白质",
+          "threshold_ref": "HIGH_PROTEIN",
+          "desc": "营养成分表中蛋白质含量需达到'高蛋白'声称条件",
+          "violation_note": "营养成分表标示蛋白质 {value}{unit}/{basis}，未达到'高蛋白'声称条件",
+          "missing_note": "营养成分表未标示蛋白质含量，无法核验'高蛋白'声称",
+          "clause": "GB28050-C-HIGH-CALCIUM"
+        }
+      ],
+      "advisories": [],
+      "clauses": [
+        "GB28050-C-HIGH-CALCIUM"
+      ],
+      "note": null
+    },
+    {
+      "id": "CLAIM_NON_FRIED",
+      "name": "非油炸",
+      "match": [
+        "非油炸",
+        "不油炸",
+        "非油炸工艺"
+      ],
+      "regulated": false,
+      "constraints": [],
+      "advisories": [
+        {
+          "type": "nutrition_present",
+          "nutrient": "脂肪",
+          "message": "该产品脂肪含量为 {value}{unit}/{basis}，可作为'非油炸'是否等同于'低脂'的判断参考"
+        }
+      ],
+      "clauses": [
+        "MARKET-SELF-CLAIM"
+      ],
+      "note": "'非油炸'描述的是加工工艺，国家标准未规定其量化核验条件，无法据此判定宣称是否成立；建议结合脂肪含量与配料表综合判断。"
+    },
+    {
+      "id": "CLAIM_CHILDREN",
+      "name": "儿童专用 / 儿童食品",
+      "match": [
+        "儿童专用",
+        "儿童食品",
+        "儿童成长",
+        "适合儿童",
+        "宝宝专用",
+        "婴幼儿专用"
+      ],
+      "regulated": false,
+      "constraints": [],
+      "semantic_intent": {
+        "name": "儿童适配",
+        "note": "「儿童专用」没有强制标准，此处核验其通常含义：钠、糖与添加剂是否处于适合儿童的较低水平。",
+        "conditions": [
+          {
+            "type": "nutrition_max",
+            "nutrient": "钠",
+            "threshold_ref": "CHILD_SODIUM",
+            "weight": "strong",
+            "desc": "儿童食品应控制钠含量",
+            "violation_note": "钠 {value}{unit}/{basis}，超出面向儿童的参考上限",
+            "missing_note": "营养成分表未标示钠，无法核验其是否适合儿童",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "nutrition_max",
+            "nutrient": "糖",
+            "threshold_ref": "CHILD_SUGAR",
+            "weight": "weak",
+            "desc": "儿童食品应控制糖含量",
+            "violation_note": "糖 {value}{unit}/{basis} 偏高，儿童建议控制摄入",
+            "missing_note": "营养成分表未标示糖，无法核验",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "additive_count_max",
+            "value": 3,
+            "weight": "weak",
+            "desc": "儿童食品的添加剂种类宜少",
+            "clause": "MARKET-SELF-CLAIM"
+          }
+        ]
+      },
+      "advisories": [
+        {
+          "type": "additive_warn",
+          "functions": [
+            "着色剂",
+            "甜味剂",
+            "防腐剂"
+          ],
+          "message": "配料中含{items}，儿童食用建议关注添加剂的种类与数量"
+        }
+      ],
+      "clauses": [
+        "MARKET-SELF-CLAIM"
+      ],
+      "note": "我国尚未针对'儿童食品'制定统一的强制标准（婴幼儿配方食品等特殊膳食用食品除外），该声称缺乏标准支撑；此处按其通常含义核验钠、糖与添加剂水平。"
+    },
+    {
+      "id": "CLAIM_NATURAL",
+      "name": "天然 / 纯天然",
+      "match": [
+        "纯天然",
+        "天然",
+        "0添加香精",
+        "不含香精",
+        "无香精"
+      ],
+      "regulated": false,
+      "constraints": [],
+      "semantic_intent": {
+        "name": "天然 / 无人工添加",
+        "note": "「天然」没有法定定义，此处核验其通常含义：不含人工合成的食品添加剂。",
+        "conditions": [
+          {
+            "type": "additive_absent",
+            "functions": [
+              "着色剂",
+              "防腐剂",
+              "抗氧化剂",
+              "增味剂"
+            ],
+            "weight": "strong",
+            "desc": "「天然」通常意味着不含人工合成的着色剂、防腐剂、甜味剂等",
+            "violation_note": "配料表中检出人工合成添加剂：{hits}",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "ingredient_absent",
+            "groups": [
+              "SWEETENER_GROUP"
+            ],
+            "weight": "strong",
+            "desc": "「天然」通常意味着不使用高倍甜味剂",
+            "violation_note": "配料表中检出高倍甜味剂：{hits}",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "additive_count_max",
+            "value": 2,
+            "weight": "weak",
+            "desc": "配料构成简单，添加剂种类很少",
+            "clause": "MARKET-SELF-CLAIM"
+          }
+        ]
+      },
+      "advisories": [
+        {
+          "type": "additive_warn",
+          "functions": [
+            "食用香料"
+          ],
+          "message": "配料中含{items}，与'天然/不含香精'类表述可能不一致"
+        }
+      ],
+      "clauses": [
+        "MARKET-SELF-CLAIM"
+      ],
+      "note": "'天然''纯天然'缺乏统一的法定定义，无法被穷尽证明；本判定核验其通常含义（不含人工添加剂），「一致」仅表示未发现相矛盾的证据。"
+    },
+    {
+      "id": "CLAIM_LIGHT",
+      "name": "轻负担 / 清爽 / 轻盈",
+      "match": [
+        "轻负担",
+        "0负担",
+        "无负担",
+        "清爽",
+        "轻盈",
+        "轻松无负担",
+        "少负担"
+      ],
+      "regulated": false,
+      "constraints": [],
+      "semantic_intent": {
+        "name": "低脂低糖",
+        "note": "「轻负担」为营销用语，此处按其通常含义核验：脂肪与糖是否处于较低水平。",
+        "conditions": [
+          {
+            "type": "nutrition_max",
+            "nutrient": "脂肪",
+            "threshold_ref": "LIGHT_FAT",
+            "weight": "strong",
+            "desc": "「轻负担」通常意味着脂肪含量较低",
+            "violation_note": "脂肪 {value}{unit}/{basis}，与'轻负担'通常含义不符",
+            "missing_note": "营养成分表未标示脂肪，无法核验",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "nutrition_max",
+            "nutrient": "糖",
+            "threshold_ref": "LIGHT_SUGAR",
+            "weight": "strong",
+            "desc": "「轻负担」通常意味着糖含量较低",
+            "violation_note": "糖 {value}{unit}/{basis}，与'轻负担'通常含义不符",
+            "missing_note": "营养成分表未标示糖，无法核验",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "nutrition_max",
+            "nutrient": "能量",
+            "threshold_ref": "LIGHT_ENERGY",
+            "weight": "weak",
+            "desc": "能量密度较低",
+            "missing_note": "营养成分表未标示能量，无法核验",
+            "clause": "MARKET-SELF-CLAIM"
+          }
+        ]
+      },
+      "advisories": [],
+      "clauses": [
+        "MARKET-SELF-CLAIM"
+      ],
+      "note": "'轻负担'非规范声称用语，本判定按其通常含义（低脂低糖）核验，阈值参照'低脂''低糖'声称条件。"
+    },
+    {
+      "id": "CLAIM_HEALTHIER",
+      "name": "更健康 / 更营养 / 健康之选",
+      "match": [
+        "更健康",
+        "更营养",
+        "健康之选",
+        "健康选择",
+        "营养均衡",
+        "更有营养"
+      ],
+      "regulated": false,
+      "constraints": [],
+      "semantic_intent": {
+        "name": "健康属性",
+        "note": "「更健康」属于比较性宣称，需与同类产品对比才有意义；缺少品类基线时，此处按绝对阈值核验其常见含义。",
+        "conditions": [
+          {
+            "type": "nutrition_max",
+            "nutrient": "钠",
+            "threshold_ref": "LIGHT_SODIUM",
+            "weight": "strong",
+            "desc": "健康属性宣称要求钠含量不偏高",
+            "violation_note": "钠 {value}{unit}/{basis} 偏高，与'更健康'宣称不符",
+            "missing_note": "营养成分表未标示钠，无法核验",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "nutrition_max",
+            "nutrient": "糖",
+            "threshold_ref": "LIGHT_SUGAR",
+            "weight": "strong",
+            "desc": "健康属性宣称要求糖含量不偏高",
+            "violation_note": "糖 {value}{unit}/{basis} 偏高，与'更健康'宣称不符",
+            "missing_note": "营养成分表未标示糖，无法核验",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "additive_count_max",
+            "value": 3,
+            "weight": "weak",
+            "desc": "添加剂种类较少",
+            "clause": "MARKET-SELF-CLAIM"
+          }
+        ]
+      },
+      "advisories": [],
+      "clauses": [
+        "MARKET-SELF-CLAIM"
+      ],
+      "note": "'更健康''更营养'为比较性宣称，缺少同类产品基线时无法严格证明；本判定按绝对阈值核验其常见含义（低钠低糖、添加剂少）。"
+    },
+    {
+      "id": "CLAIM_PURE",
+      "name": "纯正 / 正宗 / 地道",
+      "match": [
+        "纯正",
+        "正宗",
+        "纯粹",
+        "地道",
+        "原汁原味"
+      ],
+      "regulated": false,
+      "constraints": [],
+      "semantic_intent": {
+        "name": "配料纯粹",
+        "note": "「纯正/正宗」多用于描述工艺传承，此处核验其通常含义：配料构成简单、不依赖添加剂。",
+        "conditions": [
+          {
+            "type": "additive_absent",
+            "weight": "strong",
+            "desc": "「纯正」通常意味着不依赖食品添加剂",
+            "violation_note": "配料表中检出食品添加剂：{hits}",
+            "clause": "MARKET-SELF-CLAIM"
+          },
+          {
+            "type": "ingredient_count_max",
+            "value": 8,
+            "weight": "weak",
+            "desc": "配料构成较为简单",
+            "clause": "MARKET-SELF-CLAIM"
+          }
+        ]
+      },
+      "advisories": [],
+      "clauses": [
+        "MARKET-SELF-CLAIM"
+      ],
+      "note": "'纯正/正宗'缺乏法定定义，本判定核验其通常含义：配料简单、不依赖添加剂。"
+    },
+    {
+      "id": "CLAIM_ORGANIC",
+      "name": "有机",
+      "match": [
+        "有机食品",
+        "有机认证",
+        "有机"
+      ],
+      "regulated": true,
+      "constraints": [],
+      "advisories": [],
+      "clauses": [
+        "MARKET-SELF-CLAIM"
+      ],
+      "note": "有机食品应当获得有机产品认证，并在包装上标示有机认证标志与认证编码。程序仅做提示，不做认证真伪判定。"
+    }
+  ]
+}

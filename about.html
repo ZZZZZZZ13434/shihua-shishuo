@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>关于 · 食话实说 · 静态版</title>
+<link rel="stylesheet" href="static/style.css">
+<style>
+  /* 与首页、核验页一致：hero 背景图改纯色底 + 静态版横条样式。 */
+  .hero, .page-hero { background-image: none; background-color: var(--bg-soft); }
+  .hero::before, .page-hero::before { background: rgba(15, 23, 42, .30); }
+  .static-banner {
+    background: rgba(227, 192, 125, .12);
+    border-bottom: 1px solid rgba(227, 192, 125, .35);
+    color: var(--warn);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .static-banner-inner { max-width: var(--wrap); margin: 0 auto; padding: 8px 24px; }
+  .static-banner a { color: var(--warn); }
+  .static-banner b { font-weight: 700; }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12.5px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+  .state-tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(227, 192, 125, .16);
+    color: var(--warn);
+  }
+</style>
+</head>
+<body class="p-about">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">食话实说</span>
+      <span class="brand-tag">静态版</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="verify.html">拍照核验</a>
+      <a href="manual.html">手动录入</a>
+      <a href="batch.html">批量核验</a>
+      <a href="barcode.html">条码查询</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="btn btn-sm" href="verify.html">开始核验</a>
+    </div>
+  </div>
+</header>
+
+<div class="static-banner">
+  <div class="static-banner-inner">
+    <b>这是静态展示版</b>：识别在浏览器里完成，完整功能请下载程序包在本机运行。
+    本页说明它怎么识别、哪些能力没有带过来、以及为什么有些结论必须说"无法判定"。
+  </div>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <h1>关于这个静态版</h1>
+    <p>同一套判定引擎，换了一个运行环境：识别搬进浏览器，判定逻辑用 JavaScript 重写，不再需要后端。</p>
+  </div>
+</section>
+
+<main>
+
+  <div class="meta-row">
+    <span id="kbInfo">知识库信息加载中…</span>
+    <span id="engineInfo"></span>
+  </div>
+
+  <h2>为什么会有这一版</h2>
+  <p>
+    完整版用本地 OCR 识别包装标签：图像质量预检、倾斜校正、版面分区、关键区域二次识别，
+    全流程离线。这条链路的前提是"能跑 Python 的机器"——它没法部署在 GitHub Pages 这类纯静态托管上。
+  </p>
+  <p>
+    于是有了这一版：把识别搬进浏览器（ONNX Runtime Web 跑 RapidOCR 的模型），
+    把判定逻辑用 JavaScript 重写。打开一个网址就能用，不需要安装任何东西，
+    <b>照片也不离开本机</b>。
+  </p>
+
+  <h2>识别怎么做的</h2>
+  <ul class="plain-list">
+    <li><b>推理</b>：ONNX Runtime Web 在浏览器里加载 RapidOCR 的检测模型与识别模型，
+      文字检测 → 方向分类 → 文字识别，全程本地，不发任何网络请求（模型文件本身除外）。</li>
+    <li><b>无需 API Key</b>：没有第三方服务，也就没有密钥、额度与隐私问题。</li>
+    <li><b>图片预处理</b>：识别前统一到合适尺寸——太小会漏掉孤立小字，太大会拖慢浏览器端推理；
+      短边低于硬下限（200px）的图片直接拒绝，因为放大也补不回丢失的字形细节。</li>
+    <li><b>版面分区</b>：拿到文本框后，先按纵坐标聚成行，再用"锚点关键词 + 边界词 + 邻接扩展"
+      把文字分到配料表 / 营养成分表 / 宣称语三个区域。这一步与完整版的
+      <code>app/perception/layout.py</code> 逐条对应，是纯几何与文本规则，不依赖任何模型。</li>
+  </ul>
+
+  <h2>为什么不用视觉大模型</h2>
+  <p>
+    这条路先试过，最后放弃了。原因不是"读得不准"，而是<b>它会编</b>——
+    而这是个核验工具，编出来的配料会直接改变结论，报告上还看不出破绽。实测：
+  </p>
+  <ul class="plain-list">
+    <li><b>真实易拉罐</b>（黄底、曲面、小字）连跑两次，两次结果完全不同，
+      而且两次都编造了添加剂：碳酸氢钠、山梨酸钾、柠檬黄、亮蓝——
+      <b>全是添加剂</b>，每一个都会让「无添加」类宣称被误判。</li>
+    <li><b>让模型"理解后结构化"更糟</b>：它输出了图上完全没有的「羧甲基纤维素钠、柠檬酸」，
+      同时把 confidence 报成 1.0（满分自信）。</li>
+    <li>两次结果<b>取交集</b>确实能滤掉幻觉（保留下来的都是两次都抄到的），但代价是召回骤降：
+      真实图片上两次各抄到 6~9 项，交集只剩 4 项。</li>
+  </ul>
+  <p>
+    OCR 模型不会编：<b>读不到就是读不到</b>，它只会给出低置信度或干脆没有输出。
+    对"宁可漏检、不可误判"的核验工具来说，这是决定性的差别。
+    漏掉的配料会显示成"未识别"并计入不确定度，用户可以补；
+    而编造出来的配料混在正确的内容里，谁都看不出来。
+  </p>
+
+  <h2>但核对这一步仍然不能省</h2>
+  <p>
+    OCR 不编，但它会读错。倾斜、反光、小字粘连、字被包装折痕切断，都会让某几行读漏或读串行。
+    判定引擎再准，也救不回一份错的输入；而人只要对照包装看一眼就能发现。
+    所以核验页的流程是：
+  </p>
+  <ol class="plain-list">
+    <li>上传照片；</li>
+    <li>浏览器内 OCR：文字检测 → 行聚类 → 版面分区 → 结构化；</li>
+    <li><b>识别结果填进一张可编辑的表单</b>——配料表一个文本框、营养表逐行可增删改，
+      并显示"哪几行被判定为配料表""哪几行被判定为营养成分表"，
+      让人一眼看出分区有没有出错；</li>
+    <li>你对照包装核对改正后点「开始判定」，才出结论。</li>
+  </ol>
+  <p>
+    判定报告里会明确标出每个字段的来源（识别 / 识别后经人工修正 / 示例数据）与三层置信度。
+    人工核对过的数据不再按识别置信度打折——识别环节的不确定性已经被人消除了，
+    再据此拒判只会挡掉本可以给出的结论。
+  </p>
+
+  <h2>判定引擎移植了哪些能力</h2>
+  <ul class="plain-list">
+    <li>版面分区：把文本行划分为配料表 / 营养成分表 / 宣称语 / 页眉，含"营养表在配料表之前"等实测遇到的排布</li>
+    <li>标签文本解析：配料表按层级切分（括号内视为复合配料的原始配料，计入判定但不计入项数）、
+      营养成分表按「名称 数值 单位」逐条解析，含"每 100g / 每 100mL / 每份"基准识别与被拆断行的合并</li>
+    <li>配料归一：别名精确匹配 → 子串匹配（含"双字词长度差"防护）→ 模糊匹配（复刻 difflib 相似度）→ 未知配料</li>
+    <li>宣称核验三类：含量声称比阈值、配料相关声称查分组与添加剂功能、语义声称按强弱分级判定</li>
+    <li>风险评分：钠 / 糖 / 脂肪 / 饱和脂肪按阈值分级加权，输出低 / 中 / 高</li>
+    <li>人群适配：7 类人群各自的风险权重与触发规则</li>
+    <li>条款引用：每条结论都带 GB 7718 / GB 28050 / GB 2760 的条款号，可点开看原文</li>
+    <li>置信度与拒判：三层置信度取最小值，低于 0.60 不出结论，只说明缺了什么</li>
+    <li>朴素基线对照：同一份标签同时给出"只看营养成分表"的结论，用来呈现交叉核验多发现的问题</li>
+    <li>封闭世界假设防护：存在未识别配料时，不断言"不含某类物质"</li>
+  </ul>
+
+  <h2>这一版包含哪些页面</h2>
+  <ul class="plain-list">
+    <li><b>拍照核验</b>：上传照片 → 浏览器内 OCR → <b>核对编辑</b> → 判定</li>
+    <li><b>手动录入</b>：直接粘贴或敲入配料表与营养成分表文本 → 判定（与拍照核验走同一条判定通路）</li>
+    <li><b>批量核验</b>：多张照片逐张识别与判定，汇总成一张表，点行看单张完整报告</li>
+    <li><b>条码查询</b>：条码校验位本地验证；公开数据库记录能不能取到取决于对方跨域策略，取不到就如实说明卡在哪一步</li>
+  </ul>
+
+  <h2>没有移植过来的部分</h2>
+  <p>下面这些是完整版有、这一版没有的，报告里也不会假装有：</p>
+  <ul class="plain-list">
+    <li><b>图像质量预检与倾斜校正</b>：完整版在识别前会估计并校正倾斜角（实测中这是最主要的失败因素），
+      静态版暂未移植，倾斜照片的识别质量会明显更差</li>
+    <li><b>关键区域二次识别</b>：完整版会把营养成分表区域裁剪放大后重新识别，只在其结果更好时才替换</li>
+    <li><b>漏检标签直读补回</b>：针对"钠"这类被检测模型整条漏掉的短标签的补救通道</li>
+    <li><b>条码扫描与双通道融合</b>：本版有条码页，但没有摄像头解码（只能手动输入），
+      也没有服务端的条码查询与"数据库记录 × 识别结果"融合</li>
+    <li><b>PDF 报告导出</b>：拍照核验与批量核验都只能看网页报告</li>
+    <li><b>批量汇总 PDF</b>：批量页有汇总表，但没有导出</li>
+  </ul>
+
+  <h2>这一版特有的风险</h2>
+  <ul class="plain-list">
+    <li><b>识别引擎状态</b>：<span class="state-tag" id="engineStateTag">检查中…</span>
+      识别模块需要 ONNX 模型文件就位后才能工作（见 README 的部署说明）。
+      模型未就位时，<b>示例库仍然可用</b>——它不经过识别，直接喂数据给判定引擎。</li>
+    <li><b>浏览器端推理更慢</b>：同一张照片，浏览器里的推理速度取决于设备；
+      首次加载还要下载模型文件（之后走缓存）。</li>
+    <li><b>没有真实照片评测</b>：完整版的准确率数字（黄金测试集 1.000、17 种退化工况危险错误 0 处）
+      是在 Python 侧的 OCR 链路上测出来的，不能直接套用到这一版。</li>
+    <li><b>底层模型相同、链路更短</b>：识别模型与完整版同源，但少了倾斜校正与二次识别两道补救，
+      因此实际识别率会低于完整版。</li>
+  </ul>
+
+  <h2>可靠性上的取舍</h2>
+  <p>
+    识别不清时不给猜测性结论。拒判看上去像失败，但比给出一个错的结论好。
+    这一版把"识别置信度、不确定的字段、哪几行被分到了哪个区域、哪些字段缺失"
+    全部摊开显示，就是为了让人能判断这份结论值不值得信——而不是给一个看起来很确定的假答案。
+  </p>
+
+  <h2>合规声明</h2>
+  <ul class="plain-list">
+    <li>本工具提供的是事实性的标签信息核验，<b>不构成医疗或营养建议</b>。</li>
+    <li>阈值依据现行有效版本国家标准（GB 7718 / GB 28050 / GB 2760），一律以标准原文为准。</li>
+    <li>示例库的四个案例数据经实测核对，与判定引擎的真实结论一致。</li>
+    <li>照片在浏览器内处理，<b>不上传到任何服务器</b>；页面不写 Cookie、不做埋点。</li>
+    <li>不复制、不传播受版权保护的包装设计。</li>
+  </ul>
+
+  <h2>想用完整功能</h2>
+  <p>
+    批量核验、条码查询、手动录入、PDF 报告、倾斜校正与关键区域二次识别，都在程序包里。
+    解压后按 README 启动本地服务即可，接口文档在 <code>/docs</code>。
+    本页只保留"能静态托管"的那部分能力。
+  </p>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 32 32" width="17" height="17" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      食话实说 · 食品标签「宣称—配料」一致性核验与健康风险判定引擎
+    </p>
+    <p>本工具基于国家标准阈值的参考性判定，不构成医疗或营养建议。阈值以现行有效版本标准原文为准（GB 7718 / GB 28050 / GB 2760）。</p>
+    <p>真实语料来自 Open Food Facts（ODbL）；源码、知识库与评测脚本随作品一并提交。</p>
+  </div>
+</footer>
+
+<script src="static/rules.js"></script>
+<script src="static/ocr.js"></script>
+<script src="static/app.js"></script>
+</body>
+</html>
