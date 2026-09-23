@@ -88,7 +88,16 @@ a { color: var(--brand); }
   white-space: nowrap;
 }
 
-.nav { display: flex; gap: 2px; flex-wrap: wrap; margin-right: auto; }
+/* 顶栏导航居中：占据品牌与右侧动作之间的剩余空间，把链接聚在中间。
+   原来用 margin-right:auto 把导航推向左、动作区贴右，去掉右侧按钮后
+   那样会显得整条顶栏偏左。 */
+.nav {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  flex: 1;
+  justify-content: center;
+}
 
 .topbar-actions { display: flex; align-items: center; gap: 14px; flex: none; }
 
