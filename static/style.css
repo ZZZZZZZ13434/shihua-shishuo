@@ -171,6 +171,7 @@ label { display: block; font-size: 14px; margin: 14px 0 6px; }
 label:first-child { margin-top: 0; }
 
 input[type="text"],
+input[type="search"],
 textarea,
 select {
   width: 100%;
@@ -181,6 +182,27 @@ select {
   border-radius: 4px;
   background: var(--card);
   color: var(--text);
+}
+
+/* 浏览器对 search 类型有一套自己的外观：浅色底、内置放大镜与清除按钮，
+   放在深色页面上会格外扎眼。这里统一到与其它输入框一致，并去掉内置控件。 */
+input[type="search"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 input:focus,
@@ -992,6 +1014,8 @@ table.grid tr.bad-row td { background: rgba(248, 113, 113, .1); }
   padding-top: 8px;
   border-top: 1px solid var(--line);
 }
+
+
 /* ---------------------------------------------------------------- 报告元信息 */
 /* 检测依据、判定方式、数据留存三项。放在报告头部下方，让结论的来历一眼可见。 */
 .report-meta {
