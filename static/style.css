@@ -992,3 +992,34 @@ table.grid tr.bad-row td { background: rgba(248, 113, 113, .1); }
   padding-top: 8px;
   border-top: 1px solid var(--line);
 }
+/* ---------------------------------------------------------------- 报告元信息 */
+/* 检测依据、判定方式、数据留存三项。放在报告头部下方，让结论的来历一眼可见。 */
+.report-meta {
+  margin: 0;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-soft);
+  display: grid;
+  gap: 6px;
+  flex: none;
+}
+
+.report-meta > div {
+  display: flex;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.report-meta dt {
+  flex: none;
+  width: 60px;
+  color: #a3b0ad;
+  color: var(--muted);
+}
+
+.report-meta dd {
+  margin: 0;
+  color: #c6d2cf;
+  color: var(--text-soft);
+}

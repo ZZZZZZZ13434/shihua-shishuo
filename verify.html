@@ -117,7 +117,7 @@
 
       <div class="btn-row">
         <button class="btn" type="button" id="btnVerify">开始识别</button>
-        <button class="btn-ghost" type="button" id="btnClear">清空</button>
+        <button class="btn-ghost" type="button" id="btnClear">重置</button>
       </div>
       <div class="field-hint">识别完成后会出现「第二步 · 核对识别结果」，那里才真正出判定结论。</div>
     </div>
@@ -161,11 +161,8 @@
     </div>
 
     <div class="panel" id="profilePanel">
-      <div class="panel-title">我的健康档案</div>
-      <p class="small muted" style="margin-top:0">
-        设定之后，核验时若配料表里出现相关来源，报告最上方会给出提醒。
-        档案只保存在本机浏览器，不会上传，也不与任何账号关联；留空则完全不显示过敏原区块。
-      </p>
+      <div class="panel-title">三、核验参数</div>
+      <p class="small muted" style="margin-top:0">设定判定所依据的人群口径与致敏物质关注项。全部参数仅保存在本机浏览器，不上传、不与任何账号关联；留空则不启用对应判定分支。</p>
 
       <label id="allergenLabel">过敏原（可多选，共 14 类）</label>
       <div class="allergen-picker" id="allergenPicker" role="group" aria-labelledby="allergenLabel"></div>
@@ -203,13 +200,18 @@
   <aside class="verify-side">
     <div class="report-panel">
       <div class="report-head">
-        <span class="report-title">判定报告</span>
+        <span class="report-title">核验报告</span>
         <span class="report-badge" id="reportBadge">待核验</span>
       </div>
+      <dl class="report-meta">
+        <div><dt>判定依据</dt><dd>GB 7718 / GB 28050 / GB 2760</dd></div>
+        <div><dt>判定方式</dt><dd>宣称与配料交叉核验</dd></div>
+        <div><dt>数据留存</dt><dd>仅本机，不联网上传</dd></div>
+      </dl>
       <div class="report-scroll">
         <div class="stages" id="stages" hidden aria-live="polite"></div>
         <div id="placeholder" class="report-empty">
-          尚未核验。<br>上传包装照片，或点左侧示例库的任意一张开始。
+          尚未核验。<br>上传样品图像，或从示例库载入一件样品开始核验。
         </div>
         <div id="report" aria-live="polite" aria-busy="false"></div>
       </div>
