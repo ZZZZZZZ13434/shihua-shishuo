@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知识库 · 食话实说</title>
+<link rel="stylesheet" href="static/style.css?v=20260922h">
+<link rel="icon" href="favicon.ico?v=20260922h">
+</head>
+<body class="p-kb">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">食话实说</span>
+      <span class="brand-tag">标签核验</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="verify.html">拍照核验</a>
+      <a href="manual.html">手动录入</a>
+      <a href="batch.html">批量核验</a>
+      <a href="barcode.html">条码查询</a>
+      <a href="kb.html">知识库</a>
+      <a href="about.html">关于</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="topbar-link" href="#" target="_blank" rel="noopener">接口文档</a>
+      <a class="btn btn-sm" href="verify.html">开始核验</a>
+    </div>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <h1>知识库</h1>
+    <p>判定所依据的全部内容都在这里：国家标准条款、添加剂功能分类、配料别名归一表。每一条核验结论都能回溯到本页的某一条。</p>
+  </div>
+</section>
+
+<main>
+
+  <div class="kb-stats" id="kbStats">
+    <div class="kb-stat"><b>—</b><span>标准条款</span></div>
+    <div class="kb-stat"><b>—</b><span>添加剂</span></div>
+    <div class="kb-stat"><b>—</b><span>配料别名</span></div>
+    <div class="kb-stat"><b>—</b><span>标准配料名</span></div>
+  </div>
+
+  <div class="tabs kb-tabs" role="tablist">
+    <button class="tab active" type="button" role="tab" data-panel="clauses">标准条款</button>
+    <button class="tab" type="button" role="tab" data-panel="additives">添加剂</button>
+    <button class="tab" type="button" role="tab" data-panel="alias">配料别名</button>
+  </div>
+
+  <section class="kb-panel" id="panel-clauses">
+    <div class="panel">
+      <div class="panel-title">标准条款</div>
+      <p class="small muted" style="margin-top:0">
+        判定引用的全部条款。结论与条款通过条款号关联，摘要为便于理解的简述，正式引用以标准原文为准。
+      </p>
+      <input type="search" id="clauseSearch" placeholder="搜索条款内容，如「低糖」「配料表」「添加剂」">
+      <div class="kb-count" id="clauseCount"></div>
+      <div id="clauseList"></div>
+    </div>
+  </section>
+
+  <section class="kb-panel" id="panel-additives" hidden>
+    <div class="panel">
+      <div class="panel-title">食品添加剂</div>
+      <p class="small muted" style="margin-top:0">
+        功能类别依据 GB 2760 的分类框架。核验「无添加」「不添加防腐剂」这类宣称时，
+        就是按这里的类别判断配料里有没有对应成分。
+      </p>
+      <div class="kb-filters">
+        <input type="search" id="additiveSearch" placeholder="搜索添加剂名称">
+        <select id="additiveFilter"><option value="">全部功能类别</option></select>
+      </div>
+      <div class="kb-count" id="additiveCount"></div>
+      <div id="additiveList"></div>
+    </div>
+  </section>
+
+  <section class="kb-panel" id="panel-alias" hidden>
+    <div class="panel">
+      <div class="panel-title">配料别名归一</div>
+      <p class="small muted" style="margin-top:0">
+        包装上的写法五花八门，判定前要先归一成标准名。这里可以查任一写法归到哪个标准名，
+        以及它属于哪个语义分组——「无糖」这类宣称，查的就是配料表里有没有糖类分组的成员。
+      </p>
+      <input type="search" id="aliasSearch" placeholder="输入包装上的写法，如「白砂糖」「呈味核苷酸二钠」">
+      <div class="field-hint">输入任意字词即可，会同时匹配别名与标准名。</div>
+      <div class="kb-count" id="aliasCount"></div>
+      <div id="aliasResult"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 32 32" width="17" height="17" aria-hidden="true"><rect x="3" y="5" width="26" height="22" rx="4.5" fill="currentColor"/><rect x="8" y="11" width="9" height="2.6" rx="1.3" fill="#fff" opacity=".92"/><rect x="8" y="16.4" width="6" height="2.6" rx="1.3" fill="#fff" opacity=".55"/><path d="M16.5 17.6l3.3 3.4 5.2-7" fill="none" stroke="#fff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      食话实说 · 食品标签「宣称—配料」一致性核验与健康风险判定引擎
+    </p>
+    <p>本页条款摘要为便于理解的简述，不构成医疗或营养建议。阈值与引用以现行有效版本标准原文为准。</p>
+  </div>
+</footer>
+
+<script src="static/app.js?v=20260922h"></script>
+<script src="static/kb.js?v=20260922h"></script>
+</body>
+</html>

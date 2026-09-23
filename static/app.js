@@ -379,7 +379,20 @@
 
   // ---------------------------------------------------------------- 报告渲染
   // 结构与 web/static/app.js 的 renderReport 保持一致，便于两边对照。
-  function renderReport(report) {
+  /* 核验记录区块：页面加载时渲染一次；记录在核验完成后由 renderReport 写入，
+   因此这里只需在启动时画一次即可。 */
+function initHistoryBlock() {
+  const panel = document.getElementById("historyPanel");
+  if (!panel || !window.History) return;
+  window.History.render(panel);
+}
+
+function renderReport(report) {
+  // 记一条核验摘要到本机（只存摘要，不含图片与完整报告）
+  if (window.History) {
+    try { window.History.record(report); } catch (error) { /* 记录失败不影响核验 */ }
+  }
+
     if (report.rejected) {
       setReportBadge('无法判定', 'warn');
     } else {
@@ -1106,3 +1119,5 @@
     boot();
   }
 })(typeof window !== 'undefined' ? window : globalThis);
+
+document.addEventListener("DOMContentLoaded", initHistoryBlock);
